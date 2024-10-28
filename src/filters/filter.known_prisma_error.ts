@@ -10,12 +10,14 @@ export class KnownPrismaClientRequestErrorFilter implements ExceptionFilter {
 
     // console.log(`CODE.......................${exception.name}`, exception.code);
 
+    // console.log(exception);
+
     // Resource not found handler
     if (exception.code === 'P2025') {
       const model = exception.meta?.modelName;
       return response.status(404).json({
         statusCode: 404,
-        message: `${model} not found.`,
+        message: model ? `${model} not found.` : exception.message,
         error: 'Not Found',
       });
     }

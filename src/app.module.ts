@@ -15,6 +15,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { UsersService } from './users/users.service';
 import { AuthenticationModule } from './auth/authentication/authentication.module';
 import { PasswordService } from './password/password.service';
+import { ProjectsModule } from './projects/projects.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { PasswordService } from './password/password.service';
     AuthenticationModule,
     AuthorizationModule,
     PrismaModule,
+    ProjectsModule,
   ],
   controllers: [AppController],
   providers: [
