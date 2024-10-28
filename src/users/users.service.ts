@@ -1,6 +1,13 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User, Prisma } from '@prisma/client';
+import { CreateUserDto } from './user.dtos';
+import { PasswordService } from 'src/password/password.service';
 
 @Injectable()
 export class UsersService {
@@ -30,9 +37,29 @@ export class UsersService {
     });
   }
 
-  async createUser(data: Prisma.UserCreateInput): Promise<User> {
+  async createUser(createUserDto: CreateUserDto): Promise<User> {
+    const {
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      address,
+      kraPin,
+      kraAttachment,
+      password,
+    } = createUserDto;
+    const userInput: Prisma.UserCreateInput = {
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      address,
+      kraPin,
+      kraAttachment,
+      passwordDigest: PasswordService.hashedPassword(password),
+    };
     const createUser = await this.prisma.user.create({
-      data,
+      data: userInput,
     });
     return createUser;
   }
@@ -48,10 +75,10 @@ export class UsersService {
     return updateUser;
   }
 
-  async deleteUser(where: Prisma.UserWhereUniqueInput): Promise<User> {
-    const deleteUser = await this.prisma.user.delete({
-      where,
+  async deleteUser(id: string) {
+    await this.prisma.user.delete({
+      where: { id },
     });
-    return deleteUser;
+    return null;
   }
 }

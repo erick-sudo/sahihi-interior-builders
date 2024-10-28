@@ -27,6 +27,9 @@ export class GrantedAuthority {
   }
 }
 
+// Granted authority type alias
+export type UserRole = GrantedAuthority;
+
 // Current logged in user
 export class Principal {
   @Expose()
@@ -139,7 +142,7 @@ export class AuthenticationGuard implements CanActivate {
     // Attaching authtentication context (user details) to the request object
     request.authentication = Authentication.build()
       .addAuthorities(
-        new GrantedAuthority('admin'),
+        new GrantedAuthority('ROLE_ADMIN'),
         new GrantedAuthority('admin'),
         new GrantedAuthority('admin'),
       )

@@ -1,49 +1,96 @@
 import {
+  BadRequestException,
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
+  UseInterceptors,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { Prisma } from '@prisma/client';
+import { CreateUserDto, UpdateUserDto } from './user.dtos';
+import { PreAuthorize } from 'src/auth/authorization/authorization.decorators';
+import { UserRole } from 'src/auth/authentication/authentication.guard';
 
 @Controller('users')
+@UseInterceptors(ClassSerializerInterceptor)
+@PreAuthorize<UserRole>({ tokens: [{ name: 'ROLE_ADMIN' }] })
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
   @Post()
-  async create(@Body() createUserInput: Prisma.UserCreateInput) {
-    return this.userService.createUser(createUserInput);
+  async create(
+    @Body(
+      new ValidationPipe({
+        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+      }),
+    )
+    createUserDto: CreateUserDto,
+  ) {
+    return this.userService.createUser(createUserDto);
   }
 
   @Get()
-  async findAll() {
+  async index() {
     return this.userService.findAll();
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async show(
+    @Param(
+      'id',
+      new ParseUUIDPipe({
+        exceptionFactory: () =>
+          new BadRequestException('Invalid id format for user ID'),
+      }),
+    )
+    id: string,
+  ) {
     return this.userService.findById(id);
   }
 
   @Patch(':id')
   async update(
-    @Param('id') id: string,
-    @Body() updateUser: Prisma.UserUpdateInput,
+    @Param(
+      'id',
+      new ParseUUIDPipe({
+        exceptionFactory: () =>
+          new BadRequestException('Invalid id format for user ID'),
+      }),
+    )
+    id: string,
+    @Body(
+      new ValidationPipe({
+        errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+      }),
+    )
+    updateUserDto: UpdateUserDto,
   ) {
     return this.userService.updateUser({
       where: { id },
-      data: updateUser,
+      data: updateUserDto,
     });
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return this.userService.deleteUser({
-      id,
-    });
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(
+    @Param(
+      'id',
+      new ParseUUIDPipe({
+        exceptionFactory: () =>
+          new BadRequestException('Invalid id format for user ID'),
+      }),
+    )
+    id: string,
+  ) {
+    return this.userService.deleteUser(id);
   }
 }

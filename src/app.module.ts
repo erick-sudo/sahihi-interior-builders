@@ -10,7 +10,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import Joi from 'joi';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthenticationGuard } from './auth/authentication/authentication.guard';
-import { AuthorizationGuard } from './auth/authorization/authorization.guard';
+import { RolesGuard } from './auth/authorization/roles.guard';
 import { JwtModule } from '@nestjs/jwt';
 import { UsersService } from './users/users.service';
 import { AuthenticationModule } from './auth/authentication/authentication.module';
@@ -67,7 +67,7 @@ import { PasswordService } from './password/password.service';
     { provide: APP_GUARD, useClass: AuthenticationGuard },
     {
       provide: APP_GUARD,
-      useClass: AuthorizationGuard,
+      useClass: RolesGuard,
     },
     PasswordService,
   ],
