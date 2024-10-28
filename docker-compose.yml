@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  mysql_db:
+    build:
+      context: db/mysql
+      dockerfile: Dockerfile
+    container_name: sahihi_mysql_database
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: sahihi_mysql_password
+      MYSQL_DATABASE: sahihi_mysql_database
+      MYSQL_USER: sahihi_mysql_user
+      MYSQL_PASSWORD: sahihi_mysql_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - dev_sahihi_network
+
+networks:
+  dev_sahihi_network: {}
+
+volumes:
+  mysql_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./db/data/mysql

@@ -1,0 +1,32 @@
+version: '3'
+
+tasks:
+  start:
+    desc: "Start the Docker services in detached mode"
+    cmds:
+      - sudo docker compose -f docker-compose.dev.yml up 
+
+  stop:
+    desc: "Stop the Docker services"
+    cmds:
+      - sudo docker compose -f docker-compose.dev.yml down
+
+  restart:
+    desc: "Restart the Docker services"
+    cmds:
+      - docker compose -f docker-compose.dev.yml down
+      - docker compose -f docker-compose.dev.yml up -d
+
+  logs:
+    desc: "View the logs of the Docker services"
+    cmds:
+      - docker compose -f docker-compose.dev.yml logs
+
+  clean:
+    desc: "Stop and remove Docker services and volumes"
+    cmds:
+      - sudo docker compose -f docker-compose.dev.yml down --rmi all
+  server:
+    desc: "Start the server"
+    cmds:
+      - yarn run start:dev

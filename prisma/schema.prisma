@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(uuid())
+  firstName       String
+  lastName        String
+  email           String    @unique
+  phoneNumber     String    @unique
+  address         String
+  kraPin          String    @unique
+  kraAttachment   String?    // URL or path to attachment file
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  passwordDigest  String
+  projectAssignments ProjectAssignment[]
+}
+
+model Role {
+  id        String    @id @default(uuid())
+  name      String
+  projectAssignments ProjectAssignment[]
+}
+
+model Project {
+  id          String             @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  projectAssignments ProjectAssignment[]
+}
+
+model ProjectAssignment {
+  id         String     @id @default(uuid())
+  user       User       @relation(fields: [userId], references: [id])
+  userId     String
+  project    Project    @relation(fields: [projectId], references: [id])
+  projectId  String
+  role       Role       @relation(fields: [roleId], references: [id])
+  roleId     String
+  assignedAt DateTime   @default(now())
+
+  @@unique([userId, projectId, roleId])
+}
