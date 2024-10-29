@@ -3,10 +3,14 @@ import { AppService } from './app.service';
 import { AuthenticatedUser } from './users/user.authenticated';
 import { PasswordService } from './password/password.service';
 import { Public } from './decorators/route.decorator';
+import { UsersService } from './users/users.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    private readonly appService: AppService,
+    private readonly userService: UsersService,
+  ) {}
 
   @Get()
   getHello(): string {
@@ -14,8 +18,11 @@ export class AppController {
   }
 
   @Get('env')
+  @Public()
   env() {
-    return this.appService.env();
+    return this.userService.getAuthoritiesByUserId(
+      '1c4cfc24-b3cb-490b-9e72-e429007ba75b',
+    );
   }
 
   @Get('usr')

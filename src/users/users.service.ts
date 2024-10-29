@@ -110,15 +110,30 @@ export class UsersService {
     });
   }
 
-  async getAuthorities(user: User): Promise<GrantedAuthority[]> {
+  async getAuthoritiesByUserId(id: string): Promise<GrantedAuthority[]> {
     return await this.prisma.role.findMany({
       where: {
-        projectAssignments: {
-          some: {
-            userId: user.id,
+        OR: [
+          {
+            projectAssignments: {
+              some: {
+                userId: id,
+              },
+            },
           },
-        },
+          {
+            userRoles: {
+              some: {
+                userId: id,
+              },
+            },
+          },
+        ],
       },
     });
+  }
+
+  async getAuthorities(user: User): Promise<GrantedAuthority[]> {
+    return await this.getAuthoritiesByUserId(user.id);
   }
 }

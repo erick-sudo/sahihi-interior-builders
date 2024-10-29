@@ -12,6 +12,7 @@ import {
   BadRequestException,
   ValidationPipe,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { UpdateProjectDto } from './dto/update-project.dto';
@@ -19,6 +20,7 @@ import { PreAuthorize } from 'src/auth/authorization/authorization.decorators';
 import { UserRole } from 'src/auth/authentication/authentication.guard';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { AssignProjectRolessDto } from './dto/assign-project-roles.dto';
+import { Request } from 'express';
 
 @Controller('projects')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -46,8 +48,8 @@ export class ProjectsController {
       { name: 'ROLE_ENGINEER' },
     ],
   })
-  findAll() {
-    return this.projectsService.findAll();
+  findAll(@Req() request: Request) {
+    return this.projectsService.findAll(request.authentication?.authorities!!);
   }
 
   @Get(':id')

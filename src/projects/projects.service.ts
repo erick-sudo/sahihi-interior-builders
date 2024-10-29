@@ -5,6 +5,9 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { UsersService } from 'src/users/users.service';
 import { RolesService } from 'src/roles/roles.service';
 import { AssignProjectRolessDto } from './dto/assign-project-roles.dto';
+import {
+  Authentication,
+} from 'src/auth/authentication/authentication.guard';
 
 @Injectable()
 export class ProjectsService {
@@ -20,8 +23,31 @@ export class ProjectsService {
     });
   }
 
-  async findAll() {
-    return await this.prisma.project.findMany();
+  async findAll(authentication: Authentication) {
+    const roles = authentication.authorities.map((a) => a.name);
+
+    // Define projects based on roles
+    if (roles.includes('ROLE_ADMIN')) {
+      // If user is admin, return all projects
+      return await this.prisma.project.findMany();
+    } else if (
+      roles.includes('ROLE_PROJECT_MANAGER') ||
+      roles.includes('ROLE_ENGINEER')
+    ) {
+      // If user is project manager, return only assigned projects
+      return await this.prisma.project.findMany({
+        where: {
+          projectAssignments: {
+            some: {
+              userId: authentication.principal.id, // Filter projects by user assignments
+            },
+          },
+        },
+      });
+    }
+
+    // If no matching roles, return an empty array or null
+    return [];
   }
 
   async findOne(id: string) {
@@ -103,7 +129,7 @@ export class ProjectsService {
       where: {
         projectAssignments: {
           some: {
-            projectId: projectId
+            projectId: projectId,
           },
         },
       },
