@@ -16,6 +16,7 @@ import { UsersService } from './users/users.service';
 import { AuthenticationModule } from './auth/authentication/authentication.module';
 import { PasswordService } from './password/password.service';
 import { ProjectsModule } from './projects/projects.module';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { ProjectsModule } from './projects/projects.module';
     AuthorizationModule,
     PrismaModule,
     ProjectsModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [

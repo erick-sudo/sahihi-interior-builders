@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
 import { KnownPrismaClientRequestErrorFilter } from './filters/filter.known_prisma_error';
 import { ValidationPipe } from '@nestjs/common';
+import { ExcludeSensitiveDataInterceptor } from './interceptors/interceptor.sensitive-data';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -13,11 +14,19 @@ async function bootstrap() {
 
   const port = configService.get<number>('PORT', { infer: true });
 
-  app.enableCors();
+  app.enableCors({
+    origin: 'http://localhost:5173',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
   app.use(cookieParser());
 
   // A global resource not found exception filter
   app.useGlobalFilters(new KnownPrismaClientRequestErrorFilter());
+
+  // Glodal sensitive data interceptor
+  app.useGlobalInterceptors(new ExcludeSensitiveDataInterceptor());
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

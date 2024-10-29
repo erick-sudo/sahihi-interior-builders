@@ -42,6 +42,11 @@ export class UsersController {
     return this.userService.findAll();
   }
 
+  @Get("index/brief")
+  async indexBrief() {
+    return this.userService.briefUsers();
+  }
+
   @Get(':id')
   async show(
     @Param(

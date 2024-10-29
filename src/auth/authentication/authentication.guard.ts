@@ -141,11 +141,7 @@ export class AuthenticationGuard implements CanActivate {
 
     // Attaching authtentication context (user details) to the request object
     request.authentication = Authentication.build()
-      .addAuthorities(
-        new GrantedAuthority('ROLE_ADMIN'),
-        new GrantedAuthority('admin'),
-        new GrantedAuthority('admin'),
-      )
+      .addAuthorities(...(await this.usersService.getAuthorities(user)))
       .setPrincipal({ email: user.email, id: user.id });
 
     return true;

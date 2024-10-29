@@ -1,6 +1,5 @@
 import {
   Injectable,
-  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -8,6 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { User, Prisma } from '@prisma/client';
 import { CreateUserDto } from './user.dtos';
 import { PasswordService } from 'src/password/password.service';
+import { GrantedAuthority } from 'src/auth/authentication/authentication.guard';
 
 @Injectable()
 export class UsersService {
@@ -26,6 +26,18 @@ export class UsersService {
   }
   async findAll() {
     const users = await this.prisma.user.findMany();
+    return users;
+  }
+
+  async briefUsers() {
+    const users = await this.prisma.user.findMany({
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+      },
+    });
     return users;
   }
 
@@ -80,5 +92,33 @@ export class UsersService {
       where: { id },
     });
     return null;
+  }
+
+  async ensureExists(userIds: string[]) {
+    for (let userId of userIds) {
+      try {
+        this.ensureExistsById(userId);
+      } catch (e) {
+        throw new NotFoundException('Some user does not exist.');
+      }
+    }
+  }
+
+  async ensureExistsById(userId: string) {
+    return await this.prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+    });
+  }
+
+  async getAuthorities(user: User): Promise<GrantedAuthority[]> {
+    return await this.prisma.role.findMany({
+      where: {
+        projectAssignments: {
+          some: {
+            userId: user.id,
+          },
+        },
+      },
+    });
   }
 }

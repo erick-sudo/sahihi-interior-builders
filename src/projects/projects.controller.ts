@@ -18,7 +18,7 @@ import { UpdateProjectDto } from './dto/update-project.dto';
 import { PreAuthorize } from 'src/auth/authorization/authorization.decorators';
 import { UserRole } from 'src/auth/authentication/authentication.guard';
 import { CreateProjectDto } from './dto/create-project.dto';
-import { AssignManagersDto } from './dto/assign-managers.dto';
+import { AssignProjectRolessDto } from './dto/assign-project-roles.dto';
 
 @Controller('projects')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -111,11 +111,11 @@ export class ProjectsController {
     return this.projectsService.remove(id);
   }
 
-  @Patch(':id/managers/assign')
+  @Patch(':id/roles/assign')
   @PreAuthorize<UserRole>({
     tokens: [{ name: 'ROLE_ADMIN' }],
   })
-  assignManagers(
+  async assignRole(
     @Param(
       'id',
       new ParseUUIDPipe({
@@ -125,16 +125,16 @@ export class ProjectsController {
     )
     id: string,
     @Body()
-    managers: AssignManagersDto,
+    assignment: AssignProjectRolessDto,
   ) {
-    return managers;
+    return await this.projectsService.assignRoles(id, assignment);
   }
 
-  @Patch(':id/managers/unassign')
+  @Patch(':id/roles/unassign')
   @PreAuthorize<UserRole>({
     tokens: [{ name: 'ROLE_ADMIN' }],
   })
-  unassignManagers(
+  async unassignRole(
     @Param(
       'id',
       new ParseUUIDPipe({
@@ -144,8 +144,22 @@ export class ProjectsController {
     )
     id: string,
     @Body()
-    managers: AssignManagersDto,
+    assignment: AssignProjectRolessDto,
   ) {
-    return managers;
+    return await this.projectsService.unassignRoles(id, assignment);
+  }
+
+  @Get(':id/project_assignments')
+  async projectManagers(
+    @Param(
+      'id',
+      new ParseUUIDPipe({
+        exceptionFactory: () =>
+          new BadRequestException('Invalid id format for project ID'),
+      }),
+    )
+    id: string,
+  ) {
+    return await this.projectsService.projectAssignments(id);
   }
 }
