@@ -49,7 +49,7 @@ export class ProjectsController {
     ],
   })
   findAll(@Req() request: Request) {
-    return this.projectsService.findAll(request.authentication?.authorities!!);
+    return this.projectsService.findAll(request.authentication!!);
   }
 
   @Get(':id')
